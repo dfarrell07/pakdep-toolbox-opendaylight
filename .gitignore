@@ -1,2 +1,11 @@
 # Vim tmp files
 .*sw?
+
+# Vagrant files
+.vagrant/
+
+# Large artifacts generally
+*.box
+*.tar.gz
+*.iso
+*.rpm
