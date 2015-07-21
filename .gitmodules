@@ -7,3 +7,6 @@
 [submodule "puppet-opendaylight"]
 	path = puppet-opendaylight
 	url = https://github.com/dfarrell07/puppet-opendaylight.git
+[submodule "integration"]
+	path = integration
+	url = https://github.com/opendaylight/integration.git
