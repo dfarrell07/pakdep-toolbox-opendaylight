@@ -4,3 +4,6 @@
 [submodule "vagrant-opendaylight"]
 	path = vagrant-opendaylight
 	url = https://github.com/dfarrell07/vagrant-opendaylight.git
+[submodule "puppet-opendaylight"]
+	path = puppet-opendaylight
+	url = https://github.com/dfarrell07/puppet-opendaylight.git
