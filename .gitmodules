@@ -1,0 +1,3 @@
+[submodule "ansible-opendaylight"]
+	path = ansible-opendaylight
+	url = https://github.com/dfarrell07/ansible-opendaylight.git
