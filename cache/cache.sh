@@ -2,7 +2,7 @@
 # Locally cache large packaging and deployment artifacts
 
 # Echo commands as they are run
-set -x
+#set -x
 
 install_extras=true
 
@@ -14,6 +14,8 @@ odl_tarball="distribution-karaf-$odl_version.tar.gz"
 centos_iso="CentOS-7-x86_64-Minimal-1503-01.iso"
 centos_vagrant_box="chef-centos-7.0-virtualbox-1.0.0.box"
 odl_vagrant_box="opendaylight-2.3.0-centos-1503.box"
+odl_img_name="dfarrell07/odl:0.2.3"
+odl_container="dfarrell07-odl-0.2.3.tar"
 
 # Common paths used in this script
 # TODO: Smarter cache paths
@@ -23,6 +25,7 @@ centos_iso_cache_path="$centos_iso"
 centos_iso_url="http://mirrors.seas.harvard.edu/centos/7/isos/x86_64/$centos_iso"
 centos_vagrant_box_cache_path="$centos_vagrant_box"
 odl_vagrant_box_cache_path="$odl_vagrant_box"
+odl_container_cache_path="$odl_container"
 
 artifact_cached()
 {
@@ -86,7 +89,7 @@ cache_centos_vagrant_box()
     vagrant box repackage chef/centos-7.0 virtualbox 1.0.0
     mv package.box $centos_vagrant_box_cache_path
 
-    # Confirm the CentOS Vagrant base box was output to expected location
+    # Confirm the CentOS Vagrant base box was output to the expected location
     assert_artifact_cached $centos_vagrant_box_cache_path
   fi
 }
@@ -103,8 +106,24 @@ cache_odl_vagrant_box()
     vagrant box repackage dfarrell07/opendaylight virtualbox 2.3.0
     mv package.box $odl_vagrant_box_cache_path
 
-    # Confirm the CentOS Vagrant base box was output to expected location
+    # Confirm the CentOS Vagrant base box was output to the expected location
     assert_artifact_cached $odl_vagrant_box_cache_path
+  fi
+}
+
+cache_odl_container()
+{
+  # Download ODL's container (via Docker for now) if it's not cached locally
+  if ! artifact_cached $odl_container_cache_path; then
+    # Download ODL's image from DockerHub if it's not cached locally
+    docker pull $odl_img_name
+
+    # Build a tarball from the local version pulled above. Docker doesn't
+    #   have a way to download image tarballs directly, so two steps.
+    docker save --output="$odl_container_cache_path" $odl_img_name
+
+    # Confirm ODL's container was output to the expected location
+    assert_artifact_cached $odl_container_cache_path
   fi
 }
 
@@ -114,4 +133,5 @@ cache_centos_vagrant_box
 
 if [ "$install_extras" == true ]; then
   cache_odl_vagrant_box
+  cache_odl_container
 fi
