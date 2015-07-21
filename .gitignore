@@ -6,6 +6,7 @@
 
 # Large artifacts generally
 *.box
+*.tar
 *.tar.gz
 *.iso
 *.rpm
