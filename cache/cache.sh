@@ -4,23 +4,25 @@
 # Echo commands as they are run
 set -x
 
-install_extras=false
+install_extras=true
 
 # NB: These will need to be updated for version bumps
 odl_version="0.3.0-Lithium"
 
 # Common names used in this script
 odl_tarball="distribution-karaf-$odl_version.tar.gz"
-centos_vagrant_box="chef-centos-7.0-virtualbox-1.0.0.box"
 centos_iso="CentOS-7-x86_64-Minimal-1503-01.iso"
+centos_vagrant_box="chef-centos-7.0-virtualbox-1.0.0.box"
+odl_vagrant_box="opendaylight-2.3.0-centos-1503.box"
 
 # Common paths used in this script
 # TODO: Smarter cache paths
-odl_tb_cache_path="$odl_tarball"
-centos_vagrant_box_cache_path="$centos_vagrant_box"
-centos_iso_cache_path="$centos_iso"
 odl_tb_url="https://nexus.opendaylight.org/content/groups/public/org/opendaylight/integration/distribution-karaf/$odl_version/$odl_tarball"
+odl_tb_cache_path="$odl_tarball"
+centos_iso_cache_path="$centos_iso"
 centos_iso_url="http://mirrors.seas.harvard.edu/centos/7/isos/x86_64/$centos_iso"
+centos_vagrant_box_cache_path="$centos_vagrant_box"
+odl_vagrant_box_cache_path="$odl_vagrant_box"
 
 artifact_cached()
 {
@@ -92,7 +94,18 @@ cache_centos_vagrant_box()
 cache_odl_vagrant_box()
 {
   # TODO: Download OpenDaylight's Vagrant base box if it's not cached locally
-  echo "Not implemented"
+  if ! artifact_cached $odl_vagrant_box_cache_path; then
+    # Download a CentOS 7 Vagant base box if it's not cached by Vagrant
+    vagrant box add --provider virtualbox dfarrell07/opendaylight
+
+    # Build a .box file from the unpacked local version added above. Vagrant
+    #   doesn't have a way to pull .box files without unpacking them, so two steps.
+    vagrant box repackage dfarrell07/opendaylight virtualbox 2.3.0
+    mv package.box $odl_vagrant_box_cache_path
+
+    # Confirm the CentOS Vagrant base box was output to expected location
+    assert_artifact_cached $odl_vagrant_box_cache_path
+  fi
 }
 
 cache_odl_tb
