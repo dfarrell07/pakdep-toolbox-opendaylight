@@ -1,3 +1,6 @@
 [submodule "ansible-opendaylight"]
 	path = ansible-opendaylight
 	url = https://github.com/dfarrell07/ansible-opendaylight.git
+[submodule "vagrant-opendaylight"]
+	path = vagrant-opendaylight
+	url = https://github.com/dfarrell07/vagrant-opendaylight.git
