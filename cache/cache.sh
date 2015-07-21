@@ -133,6 +133,12 @@ cache_odl_container()
   fi
 }
 
+update_submodules()
+{
+  # Pull in upstream changes to projects tracked as git submodules
+  git submodule update --remote
+}
+
 
 cache_odl_tb
 cache_centos_iso
@@ -142,4 +148,5 @@ if [ "$install_extras" == true ]; then
   cache_odl_vagrant_box
   cache_odl_container
   cache_odl_rpm
+  update_submodules
 fi
