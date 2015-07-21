@@ -4,8 +4,6 @@
 # Echo commands as they are run
 #set -x
 
-install_extras=true
-
 # Common names used in this script
 odl_tarball="distribution-karaf-0.3.0-Lithium.tar.gz"
 odl_rpm="opendaylight-3.0.0-2.el7.centos.noarch.rpm"
@@ -14,6 +12,7 @@ centos_vagrant_box="chef-centos-7.0-virtualbox-1.0.0.box"
 odl_vagrant_box="opendaylight-2.3.0-centos-1503.box"
 odl_img_name="dfarrell07/odl:0.2.3"
 odl_container="dfarrell07-odl-0.2.3.tar"
+vagrant_rpm="vagrant_1.7.4_x86_64.rpm"
 
 # Common paths used in this script
 # TODO: Smarter cache paths
@@ -26,6 +25,8 @@ centos_iso_url="http://mirrors.seas.harvard.edu/centos/7/isos/x86_64/$centos_iso
 centos_vagrant_box_cache_path="$centos_vagrant_box"
 odl_vagrant_box_cache_path="$odl_vagrant_box"
 odl_container_cache_path="$odl_container"
+vagrant_rpm_url="https://dl.bintray.com/mitchellh/vagrant/$vagrant_rpm"
+vagrant_rpm_cache_path="$vagrant_rpm"
 
 artifact_cached()
 {
@@ -60,7 +61,8 @@ dl_artifact()
   cache_path=$2
 
   if ! artifact_cached $cache_path; then
-    curl -o $cache_path $url
+    # Need `-L` to follow redirects
+    curl -L -o $cache_path $url
     assert_artifact_cached $cache_path
   fi
 }
@@ -75,6 +77,12 @@ cache_odl_rpm()
 {
   # Download OpenDaylight's RPM if it's not cached locally
   dl_artifact $odl_rpm_url $odl_rpm_cache_path
+}
+
+cache_vagrant_rpm()
+{
+  # Download Vagrant's RPM if it's not cached locally
+  dl_artifact $vagrant_rpm_url $vagrant_rpm_cache_path
 }
 
 cache_centos_iso()
@@ -140,13 +148,12 @@ update_submodules()
 }
 
 
+# Kick off *all the caching*
 cache_odl_tb
 cache_centos_iso
 cache_centos_vagrant_box
-
-if [ "$install_extras" == true ]; then
-  cache_odl_vagrant_box
-  cache_odl_container
-  cache_odl_rpm
-  update_submodules
-fi
+cache_vagrant_rpm
+cache_odl_vagrant_box
+cache_odl_container
+cache_odl_rpm
+update_submodules
