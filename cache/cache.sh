@@ -13,6 +13,7 @@ odl_vagrant_box="opendaylight-2.3.0-centos-1503.box"
 odl_img_name="dfarrell07/odl:0.2.3"
 odl_container="dfarrell07-odl-0.2.3.tar"
 vagrant_rpm="vagrant_1.7.4_x86_64.rpm"
+vbox_rpm="VirtualBox-5.0-5.0.0_101573_el7-1.x86_64.rpm"
 
 # Common paths used in this script
 # TODO: Smarter cache paths
@@ -27,6 +28,8 @@ odl_vagrant_box_cache_path="$odl_vagrant_box"
 odl_container_cache_path="$odl_container"
 vagrant_rpm_url="https://dl.bintray.com/mitchellh/vagrant/$vagrant_rpm"
 vagrant_rpm_cache_path="$vagrant_rpm"
+vbox_rpm_url="http://download.virtualbox.org/virtualbox/5.0.0/$vbox_rpm"
+vbox_rpm_cache_path="$vbox_rpm"
 
 artifact_cached()
 {
@@ -83,6 +86,12 @@ cache_vagrant_rpm()
 {
   # Download Vagrant's RPM if it's not cached locally
   dl_artifact $vagrant_rpm_url $vagrant_rpm_cache_path
+}
+
+cache_vbox_rpm()
+{
+  # Download the RPM for installing VirtualBox on CentOS 7
+  dl_artifact $vbox_rpm_url $vbox_rpm_cache_path
 }
 
 cache_centos_iso()
@@ -156,4 +165,5 @@ cache_vagrant_rpm
 cache_odl_vagrant_box
 cache_odl_container
 cache_odl_rpm
+cache_vbox_rpm
 update_submodules
