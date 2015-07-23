@@ -4,6 +4,17 @@
 # Echo commands as they are run
 #set -x
 
+# Extract optional cache dir argument, default to CWD
+if [[ $# -eq 0 ]]; then
+  echo "Defaulting to . as cache_dir"
+  cache_dir="."
+elif [[ $# -eq 1 ]]; then
+  cache_dir=$1
+else
+  echo "Usage: $0 <cache dir>" >&2
+  exit 1
+fi
+
 # Common names used in this script
 odl_tarball="distribution-karaf-0.3.0-Lithium.tar.gz"
 odl_rpm="opendaylight-3.0.0-2.el7.centos.noarch.rpm"
@@ -18,18 +29,18 @@ vbox_rpm="VirtualBox-5.0-5.0.0_101573_el7-1.x86_64.rpm"
 # Common paths used in this script
 # TODO: Smarter cache paths
 odl_tb_url="https://nexus.opendaylight.org/content/groups/public/org/opendaylight/integration/distribution-karaf/0.3.0-Lithium/$odl_tarball"
-odl_tb_cache_path="$odl_tarball"
+odl_tb_cache_path="$cache_dir/$odl_tarball"
 odl_rpm_url="http://104.131.189.230/repository/$odl_rpm"
-odl_rpm_cache_path="$odl_rpm"
-centos_iso_cache_path="$centos_iso"
+odl_rpm_cache_path="$cache_dir/$odl_rpm"
+centos_iso_cache_path="$cache_dir/$centos_iso"
 centos_iso_url="http://mirrors.seas.harvard.edu/centos/7/isos/x86_64/$centos_iso"
-centos_vagrant_box_cache_path="$centos_vagrant_box"
-odl_vagrant_box_cache_path="$odl_vagrant_box"
-odl_container_cache_path="$odl_container"
+centos_vagrant_box_cache_path="$cache_dir/$centos_vagrant_box"
+odl_vagrant_box_cache_path="$cache_dir/$odl_vagrant_box"
+odl_container_cache_path="$cache_dir/$odl_container"
 vagrant_rpm_url="https://dl.bintray.com/mitchellh/vagrant/$vagrant_rpm"
-vagrant_rpm_cache_path="$vagrant_rpm"
+vagrant_rpm_cache_path="$cache_dir/$vagrant_rpm"
 vbox_rpm_url="http://download.virtualbox.org/virtualbox/5.0.0/$vbox_rpm"
-vbox_rpm_cache_path="$vbox_rpm"
+vbox_rpm_cache_path="$cache_dir/$vbox_rpm"
 
 artifact_cached()
 {
