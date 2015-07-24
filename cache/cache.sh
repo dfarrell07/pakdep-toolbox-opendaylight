@@ -26,6 +26,7 @@ odl_container="dfarrell07-odl-0.2.3.tar"
 vagrant_rpm="vagrant_1.7.4_x86_64.rpm"
 vbox_rpm="VirtualBox-5.0-5.0.0_101573_el7-1.x86_64.rpm"
 vbox_ga_iso="VBoxGuestAdditions_5.0.0.iso"
+rpmfusion_rpm="rpmfusion-free-release-21.noarch.rpm"
 
 # Common paths used in this script
 # TODO: Smarter cache paths
@@ -44,6 +45,8 @@ vbox_rpm_url="http://download.virtualbox.org/virtualbox/5.0.0/$vbox_rpm"
 vbox_rpm_cache_path="$cache_dir/$vbox_rpm"
 vbox_ga_iso_url="http://download.virtualbox.org/virtualbox/5.0.0/VBoxGuestAdditions_5.0.0.iso"
 vbox_ga_iso_cache_path="$cache_dir/$vbox_ga_iso"
+rpmfusion_rpm_url="http://download1.rpmfusion.org/free/fedora/$rpmfusion_rpm"
+rpmfusion_rpm_cache_path="$cache_dir/$rpmfusion_rpm"
 
 artifact_cached()
 {
@@ -106,6 +109,12 @@ cache_vbox_rpm()
 {
   # Download the RPM for installing VirtualBox on CentOS 7
   dl_artifact $vbox_rpm_url $vbox_rpm_cache_path
+}
+
+cache_rpmfusion_rpm()
+{
+  # Download the RPM for RPMFusion repos from which we install VBox
+  dl_artifact $rpmfusion_rpm_url $rpmfusion_rpm_cache_path
 }
 
 cache_vbox_ga_iso()
@@ -177,14 +186,20 @@ update_submodules()
 }
 
 
-# Kick off *all the caching*
+# Kick off all caching that's a simple download
 cache_odl_tb
 cache_centos_iso
-cache_centos_vagrant_box
 cache_vagrant_rpm
-cache_odl_vagrant_box
-cache_odl_container
 cache_odl_rpm
 cache_vbox_rpm
 cache_vbox_ga_iso
-update_submodules
+cache_rpmfusion_rpm
+
+# Optionally kick off complex caching
+extras=false
+if $extras; then
+  cache_centos_vagrant_box
+  cache_odl_vagrant_box
+  cache_odl_container
+  update_submodules
+fi
