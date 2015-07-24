@@ -27,11 +27,14 @@ vagrant_rpm="vagrant_1.7.4_x86_64.rpm"
 vbox_rpm="VirtualBox-5.0-5.0.0_101573_el7-1.x86_64.rpm"
 vbox_ga_iso="VBoxGuestAdditions_5.0.0.iso"
 rpmfusion_rpm="rpmfusion-free-release-21.noarch.rpm"
+unitfile_tarball="opendaylight-systemd-4a87227.tar.gz"
 
 # Common paths used in this script
 # TODO: Smarter cache paths
 odl_tb_url="https://nexus.opendaylight.org/content/groups/public/org/opendaylight/integration/distribution-karaf/0.3.0-Lithium/$odl_tarball"
 odl_tb_cache_path="$cache_dir/$odl_tarball"
+unitfile_url="https://github.com/dfarrell07/opendaylight-systemd/archive/4a87227/$unitfile_tarball"
+unitfile_cache_path="$cache_dir/$unitfile_tarball"
 odl_rpm_url="http://104.131.189.230/repository/$odl_rpm"
 odl_rpm_cache_path="$cache_dir/$odl_rpm"
 centos_iso_cache_path="$cache_dir/$centos_iso"
@@ -47,6 +50,7 @@ vbox_ga_iso_url="http://download.virtualbox.org/virtualbox/5.0.0/VBoxGuestAdditi
 vbox_ga_iso_cache_path="$cache_dir/$vbox_ga_iso"
 rpmfusion_rpm_url="http://download1.rpmfusion.org/free/fedora/$rpmfusion_rpm"
 rpmfusion_rpm_cache_path="$cache_dir/$rpmfusion_rpm"
+
 
 artifact_cached()
 {
@@ -91,6 +95,12 @@ cache_odl_tb()
 {
   # Download OpenDaylight's tarball release artifact if it's not cached locally
   dl_artifact $odl_tb_url $odl_tb_cache_path
+}
+
+cache_unitfile()
+{
+  # Download OpenDaylight's systemd unitfile if it's not cached locally
+  dl_artifact $unitfile_url $unitfile_cache_path
 }
 
 cache_odl_rpm()
@@ -190,19 +200,4 @@ update_submodules()
 cache_odl_tb
 cache_odl_rpm
 cache_odl_vagrant_box
-cache_odl_container
-update_submodules
-
-# TODO: Cache Java
-
-# Optional/unused caching
-extras=false
-if $extras; then
-  # TODO: Cache this via a normal download
-  cache_centos_vagrant_box
-  cache_vagrant_rpm
-  cache_vbox_rpm
-  cache_vbox_ga_iso
-  cache_rpmfusion_rpm
-  cache_centos_iso
-fi
+cache_unitfile

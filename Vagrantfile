@@ -17,7 +17,7 @@ Vagrant.configure(2) do |config|
     # Install required RPM building software and the repo that serves it
     pakdep.vm.provision "shell", inline: "yum install -y fedora-packager"
 
-    # Install dependiences of RPM build.sh and install.sh scripts
+    # Install dependencies of RPM build.sh and install.sh scripts
     pakdep.vm.provision "shell", inline: "yum install -y java sshpass"
 
     #
@@ -67,6 +67,11 @@ Vagrant.configure(2) do |config|
     pakdep.vm.provision "shell", inline: "docker pull centos:7"
     pakdep.vm.provision "shell", inline: "docker pull fedora:21"
     pakdep.vm.provision "shell", inline: "docker pull fedora:22"
+    pakdep.vm.provision "shell", inline: "docker pull dfarrell07/odl"
+
+    # Build ODL's Docker image
+    # It does major downloads, like Java and ODL, which we need to have cached
+    pakdep.vm.provision "shell", inline: "cd /vagrant/integration/packaging/docker/; docker build -t odl:0.2.3 ."
 
     #
     # Install/config related to Vagrant
@@ -79,9 +84,6 @@ Vagrant.configure(2) do |config|
     pakdep.vm.provision "shell", inline: "yum localinstall -y http://download1.rpmfusion.org/free/fedora/$rpmfusion_rpm/rpmfusion-free-release-21.noarch.rpm"
     # NB: This requires a reboot to take effect
     pakdep.vm.provision "shell", inline: "yum install -y VirtualBox kmod-VirtualBox"
-
-    # Cache 32 bit Vagrant base box
-    pakdep.vm.provision "shell", inline: "vagrant box add boxcutter/fedora21-i386"
 
     #
     # General system configuration
@@ -108,6 +110,15 @@ Vagrant.configure(2) do |config|
     #   * Addition of `vagrant` user to `docker` group to work
     # NB: The host OS must have the vagrant-reload plugin installed
     pakdep.vm.provision :reload
+
+    #
+    # Post-reboot tasks
+    #
+
+    # Cache 32 bit Vagrant base box
+    # This has to happen after the reboot because Vagrant breaks until its
+    #   kernel module update takes effect, and that requires a reboot.
+    pakdep.vm.provision "shell", inline: "vagrant box add boxcutter/fedora21-i386"
   end
 
 
