@@ -6,37 +6,6 @@ Vagrant.configure(2) do |config|
   # This one supports a VBox provider and has guest additions installed
   config.vm.box = "chef/centos-7.0"
 
-  # TODO: Docs
-  config.vm.define "centos" do |centos|
-    # Start with a common CentOS 7 Vagrant base box
-    # This one supports a VBox provider and has guest additions installed
-    centos.vm.box = "chef/centos-7.0"
-
-    # It doesn't seem that there are packaged headers for kernel-3.10.0-123,
-    #   so we need to update the kernel and install matching headers. While
-    #   we're updating the kernel, we'll just update everything.
-    centos.vm.provision "shell", inline: "yum update -y"
-
-    # May need to install DKMS first, to get a rebuild of the VBox kernel
-    #   module when we get a kernel upgrade via `yum update`.
-    centos.vm.provision "shell", inline: "yum install -y dkms gcc kernel-devel"
-
-    # Install/update VirtualBox Guest Additions for the new kernel
-    centos.vm.provision "shell", inline: "mount /vagrant/cache/VBoxGuestAdditions_5.0.0.iso /mnt/"
-    # This "fails" when X isn't installed, which is a false neg for us.
-    #   Appending `; true` forces a 0 exit status, letting Vagrant continue.
-    centos.vm.provision "shell", inline: "/mnt/VBoxLinuxAdditions.run; true"
-    #centos.vm.provision "shell", inline: ""
-    
-    # Need to reboot for kernel update to work on 3.x Linux
-    # NB: The host OS must have the vagrant-reload plugin installed
-    # TODO: This will fail because Guest Additions are out-of-sync
-    centos.vm.provision :reload
-
-    # Install Vagrant
-    centos.vm.provision "shell", inline: "yum localinstall -y https://dl.bintray.com/mitchellh/vagrant/vagrant_1.7.2_x86_64.rpm"
-  end
-
   config.vm.define "fedora" do |fedora|
     # Work from a Fedora 21 base box
     fedora.vm.box = "boxcutter/fedora21"
