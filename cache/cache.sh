@@ -186,20 +186,23 @@ update_submodules()
 }
 
 
-# Kick off all caching that's a simple download
+# Kick off basic/required caching
 cache_odl_tb
-cache_centos_iso
-cache_vagrant_rpm
 cache_odl_rpm
-cache_vbox_rpm
-cache_vbox_ga_iso
-cache_rpmfusion_rpm
+cache_odl_vagrant_box
+cache_odl_container
+update_submodules
 
-# Optionally kick off complex caching
+# TODO: Cache Java
+
+# Optional/unused caching
 extras=false
 if $extras; then
+  # TODO: Cache this via a normal download
   cache_centos_vagrant_box
-  cache_odl_vagrant_box
-  cache_odl_container
-  update_submodules
+  cache_vagrant_rpm
+  cache_vbox_rpm
+  cache_vbox_ga_iso
+  cache_rpmfusion_rpm
+  cache_centos_iso
 fi
