@@ -17,7 +17,7 @@ git submodule update --remote ansible-opendaylight
 git submodule update --remote vagrant-opendaylight
 
 # Build pakdep
-#vagrant up pakdep
+vagrant up pakdep
 
 # Export pakdep
 if [ -f $pakdep_box ]; then
