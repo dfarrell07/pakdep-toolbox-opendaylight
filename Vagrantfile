@@ -28,7 +28,7 @@ Vagrant.configure(2) do |config|
     pakdep.vm.provision "shell", inline: "yum install -y ansible"
 
     # Install ODL's Ansible role
-    pakdep.vm.provision "shell", inline: "ansible-galaxy install dfarrell07.opendaylight"
+    pakdep.vm.provision "shell", inline: "ansible-galaxy install dfarrell07.opendaylight --force"
 
     #
     # Install/config related to the Puppet module
@@ -40,7 +40,6 @@ Vagrant.configure(2) do |config|
     # Install bundler and configure the `vagrant` user's path to include it
     pakdep.vm.provision "shell", inline: "gem install bundler"
     pakdep.vm.provision "shell", inline: "echo \'export PATH=$PATH:/usr/local/bin\' >> /home/vagrant/.bashrc; su -c \"source ~/.bashrc\""
-    # TODO: Verify this^^
 
     # Do the actual `bundle install` step to install most Puppet deps
     # TODO: Hack, but it works. Clean it up.
@@ -49,8 +48,7 @@ Vagrant.configure(2) do |config|
     pakdep.vm.provision "shell", inline: "cd /vagrant/puppet-opendaylight; su -c \"source ~/.bashrc; bundle install\" vagrant"
 
     # Install the ODL Puppet mod system-wide
-    pakdep.vm.provision "shell", inline: "su -c \"source ~/.bashrc; puppet module install dfarrell07-opendaylight\" vagrant"
-    # TODO: Verify this^^
+    pakdep.vm.provision "shell", inline: "su -c \"/home/vagrant/bin/puppet module install dfarrell07-opendaylight\" vagrant"
 
     #
     # Install/config related to vagrant-opendaylight
@@ -58,15 +56,12 @@ Vagrant.configure(2) do |config|
 
     # Use the Gemfile in vagrant-opendaylight to install its Gem dependencies
     pakdep.vm.provision "shell", inline: "cd /vagrant/vagrant-opendaylight; su -c \"source ~/.bashrc; bundle install\" vagrant"
-    # TODO: Verify this^^
 
     # Add librarian-puppet to the path of the `vagrant` user
     pakdep.vm.provision "shell", inline: "echo \'export PATH=$PATH:/home/vagrant/bin\' >> /home/vagrant/.bashrc"
-    # TODO: Verify this^^
 
     # Install the Puppet module dependences of vagrant-odl via librarian-puppet
     pakdep.vm.provision "shell", inline: "cd /vagrant/vagrant-opendaylight; su -c \"source ~/.bashrc; librarian-puppet install\" vagrant"
-    # TODO: Verify this^^
 
     #
     # Install/config related to Docker
@@ -115,8 +110,6 @@ Vagrant.configure(2) do |config|
 
     # Ensure cache of large artifacts is populated
     # (this is related to a tutorial I'm doing)
-    #pakdep.vm.provision "shell", inline: "yum install -y git"
-    #pakdep.vm.provision "shell", path: "cache/cache.sh /vagrant/cache/"
     pakdep.vm.provision "shell" do |s|
       s.path = "cache/cache.sh"
       s.args = "/vagrant/cache/"
@@ -147,17 +140,5 @@ Vagrant.configure(2) do |config|
   # Version of the above pakdep box that has been cached via `vagrant package`
   config.vm.define "cached" do |cached|
     cached.vm.box = "dfarrell07/pakdep"
-
-    # Use the Gemfile in vagrant-opendaylight to install its Gem dependencies
-    cached.vm.provision "shell", inline: "cd /vagrant/vagrant-opendaylight; su -c \"source ~/.bashrc; bundle install\" vagrant"
-
-    # Add librarian-puppet to the path of the `vagrant` user
-    cached.vm.provision "shell", inline: "echo \'export PATH=$PATH:/home/vagrant/bin\' >> /home/vagrant/.bashrc"
-
-    # Install the Puppet module dependences of vagrant-odl via librarian-puppet
-    cached.vm.provision "shell", inline: "cd /vagrant/vagrant-opendaylight; su -c \"source ~/.bashrc; librarian-puppet install\" vagrant"
-
-    # Install the ODL Puppet mod system-wide
-    cached.vm.provision "shell", inline: "su -c \"source ~/.bashrc; puppet module install dfarrell07-opendaylight\" vagrant"
   end
 end
