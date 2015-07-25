@@ -39,13 +39,34 @@ Vagrant.configure(2) do |config|
 
     # Install bundler and configure the `vagrant` user's path to include it
     pakdep.vm.provision "shell", inline: "gem install bundler"
-    pakdep.vm.provision "shell", inline: "echo export PATH=$PATH:/usr/local/bin >> /home/vagrant/.bashrc"
+    pakdep.vm.provision "shell", inline: "echo \'export PATH=$PATH:/usr/local/bin\' >> /home/vagrant/.bashrc; su -c \"source ~/.bashrc\""
+    # TODO: Verify this^^
 
     # Do the actual `bundle install` step to install most Puppet deps
     # TODO: Hack, but it works. Clean it up.
     #   The hack relates to needing to run as the `vagrant` user and needing
     #   the path update above to work.
     pakdep.vm.provision "shell", inline: "cd /vagrant/puppet-opendaylight; su -c \"source ~/.bashrc; bundle install\" vagrant"
+
+    # Install the ODL Puppet mod system-wide
+    cached.vm.provision "shell", inline: "su -c \"source ~/.bashrc; puppet module install dfarrell07-opendaylight\" vagrant"
+    # TODO: Verify this^^
+
+    #
+    # Install/config related to vagrant-opendaylight
+    #
+
+    # Use the Gemfile in vagrant-opendaylight to install its Gem dependencies
+    cached.vm.provision "shell", inline: "cd /vagrant/vagrant-opendaylight; su -c \"source ~/.bashrc; bundle install\" vagrant"
+    # TODO: Verify this^^
+
+    # Add librarian-puppet to the path of the `vagrant` user
+    cached.vm.provision "shell", inline: "echo \'export PATH=$PATH:/home/vagrant/bin\' >> /home/vagrant/.bashrc"
+    # TODO: Verify this^^
+
+    # Install the Puppet module dependences of vagrant-odl via librarian-puppet
+    cached.vm.provision "shell", inline: "cd /vagrant/vagrant-opendaylight; su -c \"source ~/.bashrc; librarian-puppet install\" vagrant"
+    # TODO: Verify this^^
 
     #
     # Install/config related to Docker
@@ -118,12 +139,25 @@ Vagrant.configure(2) do |config|
     # Cache 32 bit Vagrant base box
     # This has to happen after the reboot because Vagrant breaks until its
     #   kernel module update takes effect, and that requires a reboot.
-    pakdep.vm.provision "shell", inline: "vagrant box add boxcutter/fedora21-i386"
+    # TODO: Verify that's true^^
+    pakdep.vm.provision "shell", inline: "su -c \"vagrant box add boxcutter/fedora21-i386\""
   end
 
 
   # Version of the above pakdep box that has been cached via `vagrant package`
   config.vm.define "cached" do |cached|
     cached.vm.box = "dfarrell07/pakdep"
+
+    # Use the Gemfile in vagrant-opendaylight to install its Gem dependencies
+    cached.vm.provision "shell", inline: "cd /vagrant/vagrant-opendaylight; su -c \"source ~/.bashrc; bundle install\" vagrant"
+
+    # Add librarian-puppet to the path of the `vagrant` user
+    cached.vm.provision "shell", inline: "echo \'export PATH=$PATH:/home/vagrant/bin\' >> /home/vagrant/.bashrc"
+
+    # Install the Puppet module dependences of vagrant-odl via librarian-puppet
+    cached.vm.provision "shell", inline: "cd /vagrant/vagrant-opendaylight; su -c \"source ~/.bashrc; librarian-puppet install\" vagrant"
+
+    # Install the ODL Puppet mod system-wide
+    cached.vm.provision "shell", inline: "su -c \"source ~/.bashrc; puppet module install dfarrell07-opendaylight\" vagrant"
   end
 end
