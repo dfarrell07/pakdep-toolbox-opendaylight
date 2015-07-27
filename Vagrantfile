@@ -39,7 +39,8 @@ Vagrant.configure(2) do |config|
 
     # Install bundler and configure the `vagrant` user's path to include it
     pakdep.vm.provision "shell", inline: "gem install bundler"
-    pakdep.vm.provision "shell", inline: "echo \'export PATH=$PATH:/usr/local/bin\' >> /home/vagrant/.bashrc; su -c \"source ~/.bashrc\""
+    pakdep.vm.provision "shell", inline: "echo \'export PATH=$PATH:/usr/local/bin\' >> /home/vagrant/.bashrc; su -c \"source ~/.bashrc\" vagrant"
+    # TODO: Is that^^ `source` step required?
 
     # Do the actual `bundle install` step to install most Puppet deps
     # TODO: Hack, but it works. Clean it up.
@@ -133,12 +134,43 @@ Vagrant.configure(2) do |config|
     # This has to happen after the reboot because Vagrant breaks until its
     #   kernel module update takes effect, and that requires a reboot.
     # TODO: Verify that's true^^
-    pakdep.vm.provision "shell", inline: "su -c \"vagrant box add boxcutter/fedora21-i386\""
+    pakdep.vm.provision "shell", inline: "su -c \"vagrant box add boxcutter/fedora21-i386\" vagrant"
   end
 
 
   # Version of the above pakdep box that has been cached via `vagrant package`
   config.vm.define "cached" do |cached|
     cached.vm.box = "dfarrell07/pakdep"
+    # Remove old lock file (shouldn't have been cached in v0.1.0) if it exits
+    cached.vm.provision "shell", inline: "rm /vagrant/.git/modules/puppet-opendaylight/index.lock; true"
+
+    # Change /vagrant/.git/config to use HTTPS URL
+    cached.vm.provision "shell", inline: "sed -ri 's/git@github.com:/https:\\/\\/github.com\\//' /vagrant/.git/config"
+
+    # Install tree, very useful for browsing source
+    cached.vm.provision "shell", inline: "yum install -y tree"
+
+    # TODO: Pull updates to pakdep repo from /vagrant
+    #cached.vm.provision "shell", inline: "cd /vagrant; su -c \"git pull\" vagrant"
+    # Not sure this^^ makese sense, the Vagrantfile updating itself
+    # TODO: Checkout a dev branch of puppet-opendaylight to get local RPM install
+
+    # Update git submodules
+    cached.vm.provision "shell", inline: "cd /vagrant; su -c \"git submodule update --remote integration\""
+    cached.vm.provision "shell", inline: "cd /vagrant; su -c \"git submodule update --remote puppet-opendaylight\""
+    cached.vm.provision "shell", inline: "cd /vagrant; su -c \"git submodule update --remote ansible-opendaylight\""
+    cached.vm.provision "shell", inline: "cd /vagrant; su -c \"git submodule update --remote vagrant-opendaylight\""
+
+    # Update our system-wide install of the ODL Ansible role
+    cached.vm.provision "shell", inline: "ansible-galaxy install dfarrell07.opendaylight --force"
+    # Could also^^ rsync from /vagrant/ansible-opendaylight
+    #cached.vm.provision "shell", inline: "rsync -r /vagrant/ansible-opendaylight/* /etc/ansible/roles/dfarrell07.opendaylight/"
+
+    # Do minimal Puppet install steps as root as well
+    # `puppet apply` requires running as root using the yum module
+    # TODO: One of these hung once?
+    #cached.vm.provision "shell", inline: "gem install puppet"
+    #cached.vm.provision "shell", inline: "/home/vagrant/bin/puppet module install dfarrell07-opendaylight"
+    # TODO: Add back once we have Puppet local install support
   end
 end
