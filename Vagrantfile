@@ -140,7 +140,7 @@ Vagrant.configure(2) do |config|
 
   # Version of the above pakdep box that has been cached via `vagrant package`
   config.vm.define "cached" do |cached|
-    cached.vm.box = "dfarrell07/pakdep"
+    cached.vm.box = "pakdep"
     # Remove old lock file (shouldn't have been cached in v0.1.0) if it exits
     cached.vm.provision "shell", inline: "rm /vagrant/.git/modules/puppet-opendaylight/index.lock; true"
 
